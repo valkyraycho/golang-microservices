@@ -21,7 +21,7 @@ type accountService struct {
 	repository Repository
 }
 
-func newSerivce(r Repository) Service {
+func NewService(r Repository) Service {
 	return &accountService{repository: r}
 }
 
