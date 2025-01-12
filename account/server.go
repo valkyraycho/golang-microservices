@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/valkyraycho/go-microservices/account/pb"
+	pb "github.com/valkyraycho/go-microservices/account/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
