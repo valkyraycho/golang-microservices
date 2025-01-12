@@ -3,6 +3,8 @@ package account
 import (
 	"context"
 	"database/sql"
+
+	_ "github.com/lib/pq"
 )
 
 type Repository interface {
@@ -33,8 +35,8 @@ func (r *postgresRepository) Close() {
 	r.db.Close()
 }
 
-func (r *postgresRepository) Ping() {
-	r.db.Ping()
+func (r *postgresRepository) Ping() error {
+	return r.db.Ping()
 }
 
 func (r *postgresRepository) CreateAccount(ctx context.Context, a Account) error {

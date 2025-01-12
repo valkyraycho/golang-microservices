@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "./proto";
 
-package pb;
+package account_service;
 
 service AccountService {
     rpc PostAccount (PostAccountRequest) returns (PostAccountResponse);
