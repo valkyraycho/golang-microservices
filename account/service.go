@@ -27,24 +27,19 @@ func newSerivce(r Repository) Service {
 
 func (s *accountService) PostAccount(ctx context.Context, name string) (*Account, error) {
 	a := &Account{ID: ksuid.New().String(), Name: name}
-	err := s.repository.CreateAccount(ctx, *a)
-	if err != nil {
+
+	if err := s.repository.CreateAccount(ctx, *a); err != nil {
 		return nil, err
 	}
 	return a, nil
 }
 
 func (s *accountService) GetAccount(ctx context.Context, id string) (*Account, error) {
-	a, err := s.repository.GetAccountByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return a, nil
+	return s.repository.GetAccountByID(ctx, id)
 }
 func (s *accountService) GetAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error) {
-	accounts, err := s.repository.ListAccounts(ctx, skip, take)
-	if err != nil {
-		return nil, err
+	if take > 100 || (take == 0 && skip == 0) {
+		take = 100
 	}
-	return accounts, nil
+	return s.repository.ListAccounts(ctx, skip, take)
 }
