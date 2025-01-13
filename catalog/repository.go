@@ -48,7 +48,7 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 	}
 
 	if !res.Found {
-		return nil, errors.New("Entity not found")
+		return nil, errors.New("entity not found")
 	}
 
 	p := productDocument{}
