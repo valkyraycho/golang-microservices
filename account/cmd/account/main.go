@@ -27,6 +27,7 @@ func main() {
 		r, err = account.NewPostgresRepository(cfg.DatabaseURL)
 		if err != nil {
 			log.Println(err)
+			return err
 		}
 		return nil
 	})

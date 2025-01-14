@@ -26,6 +26,7 @@ func main() {
 		r, err = catalog.NewElasticRepository(cfg.DatabaseURL)
 		if err != nil {
 			log.Println(err)
+			return err
 		}
 		return nil
 	})
