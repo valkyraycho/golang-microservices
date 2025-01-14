@@ -123,7 +123,7 @@ func (s *orderServer) GetOrdersForAccount(ctx context.Context, r *pb.GetOrdersFo
 			productIDMap[p.ID] = true
 		}
 	}
-	productIDs := make([]string, len(productIDMap))
+	productIDs := []string{}
 	for id := range productIDMap {
 		productIDs = append(productIDs, id)
 	}
