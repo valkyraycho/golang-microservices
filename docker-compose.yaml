@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+    account-db:
+        build:
+            context: ./account
+            dockerfile: db.Dockerfile
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=account
+        ports:
+            - "5432:5432"
+
+    account-service:
+        build:
+            context: .
+            dockerfile: account/app.Dockerfile
+        environment:
+            - DATABASE_URL=postgres://postgres:postgres@account-db:5432/account?sslmode=disable
+        depends_on:
+            - account-db
+        ports:
+            - "8081:8080"
+
+    catalog-service:
+        build:
+            context: .
+            dockerfile: catalog/app.Dockerfile
+        environment:
+            - DATABASE_URL=http://catalog-db:9200
+        depends_on:
+            - catalog-db
+        ports:
+            - "8082:8080"
+
+    catalog-db:
+        image: elasticsearch:7.9.3
+        environment:
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+        ports:
+            - "9200:9200"
+
+    order-db:
+        build:
+            context: ./order
+            dockerfile: db.Dockerfile
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=order
+        ports:
+            - "5433:5432"
+
+    order-service:
+        build:
+            context: .
+            dockerfile: order/app.Dockerfile
+        environment:
+            - DATABASE_URL=postgres://postgres:postgres@order-db:5432/order?sslmode=disable
+            - ACCOUNT_SERVICE_URL=account-service:8080
+            - CATALOG_SERVICE_URL=catalog-service:8080
+        depends_on:
+            - order-db
+            - account-service
+            - catalog-service
+        ports:
+            - "8083:8080"
+
+    graphql-gateway:
+        build:
+            context: .
+            dockerfile: graphql/Dockerfile
+        environment:
+            - ACCOUNT_SERVICE_URL=account-service:8080
+            - CATALOG_SERVICE_URL=catalog-service:8080
+            - ORDER_SERVICE_URL=order-service:8080
+        depends_on:
+            - account-service
+            - catalog-service
+            - order-service
+        ports:
+            - "8080:8080"
