@@ -110,3 +110,59 @@ func (s *orderServer) PostOrder(ctx context.Context, r *pb.PostOrderRequest) (*p
 		},
 	}, nil
 }
+
+func (s *orderServer) GetOrdersForAccount(ctx context.Context, r *pb.GetOrdersForAccountRequest) (*pb.GetOrdersForAccountResponse, error) {
+	accountOrders, err := s.service.GetOrdersForAccount(ctx, r.AccountId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	productIDMap := map[string]bool{}
+	for _, o := range accountOrders {
+		for _, p := range o.Products {
+			productIDMap[p.ID] = true
+		}
+	}
+	productIDs := make([]string, len(productIDMap))
+	for id := range productIDMap {
+		productIDs = append(productIDs, id)
+	}
+
+	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
+	if err != nil {
+		log.Println("Error getting account products: ", err)
+		return nil, err
+	}
+
+	orders := []*pb.Order{}
+	for _, o := range accountOrders {
+		createdAt, _ := o.CreatedAt.MarshalBinary()
+		pbOrder := &pb.Order{
+			Id:         o.ID,
+			AccountId:  o.AccountID,
+			TotalPrice: o.TotalPrice,
+			CreatedAt:  createdAt,
+			Products:   []*pb.Order_OrderProduct{},
+		}
+
+		for _, orderProduct := range o.Products {
+			for _, product := range products {
+				if orderProduct.ID == product.ID {
+					orderProduct.Name = product.Name
+					orderProduct.Description = product.Description
+					orderProduct.Price = product.Price
+					break
+				}
+			}
+			pbOrder.Products = append(pbOrder.Products, &pb.Order_OrderProduct{
+				Id:          orderProduct.ID,
+				Name:        orderProduct.Name,
+				Description: orderProduct.Description,
+				Price:       orderProduct.Price,
+				Quantity:    orderProduct.Quantity,
+			})
+		}
+		orders = append(orders, pbOrder)
+	}
+	return &pb.GetOrdersForAccountResponse{Orders: orders}, nil
+}
