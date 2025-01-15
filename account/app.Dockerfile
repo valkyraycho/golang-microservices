@@ -8,11 +8,10 @@ WORKDIR /app
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
-COPY vendor vendor
 COPY account account
 
 # Build the application
-RUN GO111MODULE=on go build -mod vendor -o main ./account/cmd/account
+RUN GO111MODULE=on go build -o main ./account/cmd/account
 
 # Final stage
 FROM alpine:3.21

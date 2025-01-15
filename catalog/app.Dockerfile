@@ -7,11 +7,10 @@ WORKDIR /app
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
-COPY vendor vendor
 COPY catalog catalog
 
 # Build the application
-RUN GO111MODULE=on go build -mod vendor -o main ./catalog/cmd/catalog
+RUN GO111MODULE=on go build -o main ./catalog/cmd/catalog
 
 # Final stage
 FROM alpine:3.21
